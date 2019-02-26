@@ -88,22 +88,42 @@ def pushSSH(Map args) {
     if(config) {
         if (username == null || email == null || creds_ids == null)
             error "Error. Invalid value set: { username = ${username}, email = ${email}, credentials = ${creds_ids} }";
-        sh """ git config push.default simple
-               git config user.name \"${username}\"
-               git config user.email \"${email}\"
-           """
+
+        if (isUnix()) {
+            sh """ 
+                git config push.default simple
+                git config user.name \"${username}\"
+                git config user.email \"${email}\"
+            """
+        } else {
+            bat """ 
+                git config push.default simple
+                git config user.name \"${username}\"
+                git config user.email \"${email}\"
+            """
+        }
     }
 
     sshagent (credentials: creds_ids) {
         if (files != null) {
-            sh """ git add ${files} && git commit -m \"${commitMsg}\"
-                   git push origin HEAD:refs/heads/${branch}
-               """
+            if (isUnix()) {
+                sh "git add ${files}"
+                sh "git commit -m \"${commitMsg}\""
+                sh "git push origin HEAD:refs/heads/${branch}"
+            } else {
+                bat "git add ${files}"
+                bat "git commit -m \"${commitMsg}\""
+                bat "git push origin HEAD:refs/heads/${branch}"
+            }
         }
         if (tagName != null) {
-            sh """ git tag -fa \"${tagName}\" -m \"${commitMsg}\"
-                   git push -f origin refs/tags/${tagName}:refs/tags/${tagName}
-               """
+            if (isUnix()) {
+                sh "git tag -fa \"${tagName}\" -m \"${commitMsg}\""
+                sh "git push -f origin refs/tags/${tagName}:refs/tags/${tagName}"
+            } else {
+                bat "git tag -fa \"${tagName}\" -m \"${commitMsg}\""
+                bat "git push -f origin refs/tags/${tagName}:refs/tags/${tagName}"
+            }
         }
     }
 }
