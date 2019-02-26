@@ -31,7 +31,7 @@
  * To keep things going while we wait for official Git Publish support for pipelines (https://issues.jenkins-ci.org/browse/JENKINS-28335)
  *
  * Example call (Inline values):
- * pushSSH(branch: "master", commitMsg: "Jenkins build #${env.BUILD_NUMBER}", tagName: "build-${env.BUILD_NUMBER}", files: ".", config: true, username: "Jenkins CI", email: "jenkins-ci@example.com");
+ * git_push_ssh(branch: "master", commitMsg: "Jenkins build #${env.BUILD_NUMBER}", tagName: "build-${env.BUILD_NUMBER}", files: ".", config: true, username: "Jenkins CI", email: "jenkins-ci@example.com");
  *
  * Example call (Environment variables):
  * env.BRANCH_NAME = "mycoolbranch"// BRANCH_NAME is predefined in multibranch pipeline job
@@ -40,7 +40,7 @@
  * env.J_EMAIL = "jenkins-ci@example.com"
  * env.J_CREDS_IDS = '02aa92ec-593e-4a90-ac85-3f43a06cfae3' // Use credentials id from Jenkins (Does anyone know a way to reference them by name rather than by id?)
  * ...
- * pushSSH(commitMsg: "Jenkins build #${env.BUILD_NUMBER}", tagName: "build-${env.BUILD_NUMBER}", files: ".");
+ * git_push_ssh(commitMsg: "Jenkins build #${env.BUILD_NUMBER}", tagName: "build-${env.BUILD_NUMBER}", files: ".");
  *
  * @param args Map with followinf parameters:
  *   commitMsg : (String) commit message
@@ -53,7 +53,7 @@
  *   email : (String) committer email (If not specified will check out env variable J_EMAIL)
  */
  
-def pushSSH(Map args) {
+def call(Map args) {
     // args
     String tagName = args.tagName
     String commitMsg = args.commitMsg
@@ -127,23 +127,3 @@ def pushSSH(Map args) {
         }
     }
 }
-
-
-boolean skipIfCommitterIs(String username) {
-    def changeSetCount = 0;
-    def ciSkipCount = 0;
-    def changeLogSets = currentBuild.changeSets
-    if (changeLogSets != null && changeLogSets.size() > 0) {
-        def entries = changeLogSets[changeLogSets.size()-1].items
-        def entry = entries[entries.length-1]
-        if (entry.author.getDisplayName().contains(username)) {
-            print "skip build ( author: \"${entry.author.getDisplayName()}\" , commit: \"${entry.msg}\", id: ${entry.commitId})"
-            return true
-        } else {
-            print "last commit - author: \"${entry.author}\" , commit: \"${entry.msg}\", id: ${entry.commitId}"
-            return false
-        }
-    }
-}
-
-return this;
