@@ -68,11 +68,11 @@ def pushSSH(Map args) {
     List<String> creds_ids = args.creds != null ? args.creds : env.J_CREDS_IDS.tokenize(" ");
     boolean config; // Boolean.parseBoolean() is forbidden in this DSL
 
-    if(args.config != null)
+    if (args.config != null) {
         config = args.config
-    else if (env.J_GIT_CONFIG != null && env.J_GIT_CONFIG.toLowerCase() == "true") {
+    } else if (env.J_GIT_CONFIG != null && env.J_GIT_CONFIG.toLowerCase() == "true") {
         config = true
-    }else {
+    } else {
         echo "J_GIT_CONFIG = ${env.J_GIT_CONFIG}, assuming false"
         config = false;
     }
@@ -124,6 +124,24 @@ def pushSSH(Map args) {
                 bat "git tag -fa \"${tagName}\" -m \"${commitMsg}\""
                 bat "git push -f origin refs/tags/${tagName}:refs/tags/${tagName}"
             }
+        }
+    }
+}
+
+
+boolean skipIfCommitterIs(String username) {
+    def changeSetCount = 0;
+    def ciSkipCount = 0;
+    def changeLogSets = currentBuild.changeSets
+    if (changeLogSets != null && changeLogSets.size() > 0) {
+        def entries = changeLogSets[changeLogSets.size()-1].items
+        def entry = entries[entries.length-1]
+        if (entry.author.getDisplayName().contains(username)) {
+            print "skip build ( author: \"${entry.author.getDisplayName()}\" , commit: \"${entry.msg}\", id: ${entry.commitId})"
+            return true
+        } else {
+            print "last commit - author: \"${entry.author}\" , commit: \"${entry.msg}\", id: ${entry.commitId}"
+            return false
         }
     }
 }
