@@ -7,13 +7,19 @@ def call(String projectFile, configuration = 'Release', platofrm = 'AnyCPU', arg
     }
 }
 
+/**
+ * params: projectFile ( required ), configuration: 'Release', platform: 'AnyCPU', args: ''
+ */
 def call(HashMap argsMap, String projectFile) {
-    argsMap.configuration = argsMap.configuration ?: 'Release'
-    argsMap.platform = argsMap.platform ?: 'AnyCPU'
-    argsMap.args = argsMap.args ?: ''
+    argsMap.configuration = argsMap.get("configuration", "Release")
+    argsMap.platform = argsMap.get("platform", "AnyCPU")
+    argsMap.args = argsMap.get("args", "")
     call(projectFile, argsMap.configuration, argsMap.platform, argsMap.args)
 }
 
+/**
+ * params: projectFile ( required ), configuration: 'Release', platform: 'AnyCPU', args: ''
+ */
 def call(HashMap argsMap) {
     argsMap.configuration = argsMap.configuration ?: 'Release'
     argsMap.platform = argsMap.platform ?: 'AnyCPU'
