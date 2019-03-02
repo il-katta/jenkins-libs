@@ -84,8 +84,11 @@ def netstandard_main(file_name):
 
 
 def vbframework_main(file_name):
-    new_version = find_and_increase(file_name, r'^<Assembly: AssemblyFileVersion\("(.*)"\)>$')
-
+    new_version = find_and_increase(file_name, r'^\<Assembly: AssemblyFileVersion\("(.*)"\)\>')
+    if new_version is None:
+        print("no changes")
+        sys.exit(1)
+    print(new_version, end='')
 
 def csframework_main(file_name):
     new_version = find_and_increase(file_name, r'^\[assembly: AssemblyFileVersion\("(.*)"\)]$')
@@ -93,7 +96,6 @@ def csframework_main(file_name):
         print("no changes")
         sys.exit(1)
     print(new_version, end='')
-
 
 # main
 if __name__ == '__main__':

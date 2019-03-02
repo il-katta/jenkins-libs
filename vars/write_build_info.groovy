@@ -10,7 +10,6 @@ String get_date_string() {
 
 LinkedHashMap get_data() {
     def data = [:]
-    data.BRANCH_NAME = env.BRANCH_NAME
     data.BUILD = env.BUILD_TAG
     data.COMMIT = env.GIT_COMMIT
     data.BANCH = env.GIT_BRANCH
@@ -18,10 +17,34 @@ LinkedHashMap get_data() {
     return data
 }
 
+def delete_if_exists (String fileName) {
+    File file = null
+    if (isUnix()) {
+        file = new File("${workspace}", fileName);
+       
+    } else {
+        file = new File("${workspace}\\${fileName}")
+    }
+    if (file.exists()) {
+        //file.delete()
+        print "${file}: exists"
+    }
+    if (isUnix()) {
+        sh "rm -f \"${file}\""
+    } else {
+        bat "del \"${file}\" /s /f /q"
+    }
+}
+
 def to_json_file(String fileName) {
     def data = get_data()
+    def jsonStr = groovy.json.JsonOutput.toJson(data)
+    delete_if_exists(fileName)
+    writeFile file: fileName, text: jsonStr, encoding: 'UTF-8'
 
-    writeJSON file: fileName, json: data, pretty: true 
+    // non funziona ( java.lang.UnsupportedOperationException: must specify $class with an implementation of interface net.sf.json.JSON )
+    // writeJSON file: fileName, json: data, pretty: true 
+
     /* 
     // non funziona ( java.io.NotSerializableException: groovy.json.JsonBuilder )
 
@@ -31,7 +54,7 @@ def to_json_file(String fileName) {
 
     print json_str
 
-    writeFile file: fileName, text: json_str
+    writeFile file: fileName, text: json_str, encoding: 'UTF-8'
     */
 }
 
@@ -39,6 +62,8 @@ def to_yaml_file(String fileName) {
     def data = get_data()
 
     print data.toString()
-
+    
+    delete_if_exists(fileName)
+    
     writeYaml file: fileName, data: data
 }
