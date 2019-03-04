@@ -1,9 +1,5 @@
 #!/usr/bin/groovy
 
-
-
-
-
 def download_unix() {
     def ret = sh(
         returnStatus: true, 
@@ -41,10 +37,28 @@ def download_windows() {
 
 def call() {
     print "starting download nuget.exe ..."
-    def ret = 0
     if (isUnix()) {
         download_unix()
     } else {
         download_windows()
+    }
+}
+
+
+def call(String slnFile) {
+    if ((new File("nuget.exe")).exists()) {
+        print "starting download nuget.exe ..."
+        if (isUnix()) {
+            download_unix()
+        } else {
+            download_windows()
+        }
+    }
+
+    print "starting restoring packages for ${slnFile} ..."
+    if (isUnix()) {
+        sh "mono nuget.exe restore \"${slnFile}\""
+    } else {
+        powershell "nuget restore \"${slnFile}\""
     }
 }
