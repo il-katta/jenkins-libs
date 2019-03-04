@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 '''
-    incrementa l'ultimo numero di versione ( build version ) nei file .csproj per progetti ".NET Standard"
+    setta la versione o incrementa l'ultimo numero di versione ( build version ) nei file .csproj per progetti ".NET Standard"
+    o nei file AssemblyInfo nei progetti ".NET Framework"
     usage: 
-           projedit.py netstandard path/to/project.csproj
-           projedit.py vbframework path/to/AssemblyInfo.vb
-           projedit.py csframework path/to/AssemblyInfo.cs
+           projedit.py netstandard path/to/project.csproj [<new version number>]
+           projedit.py vbframework path/to/AssemblyInfo.vb [<new version number>]
+           projedit.py csframework path/to/AssemblyInfo.cs [<new version number>]
 
 '''
 import sys
@@ -44,32 +45,35 @@ def netstandard_inc_version(proj, path):
     return new_version
 
 
-def find_and_increase(file_name, regexp):
+def find_and_replace(file_name, regexp, new_version=None):
     re_assembly_file = re.compile(regexp)
     new_version = None
     with fileinput.FileInput(file_name, inplace=True, backup='.bak') as file:
         for line in file:
             if re_assembly_file.match(line):
                 current_version = re_assembly_file.findall(line).pop()
-                new_version = increase_version_str(current_version)
+                if new_version is None:
+                    new_version = increase_version_str(current_version)
                 print(line.replace(current_version, new_version), end='')
             else:
                 print(line, end='')
     return new_version
 
 
-def netstandard_main(file_name):
+def netstandard_main(file_name, new_version=None):
     proj = ElementTree.parse(file_name)
     version = None
     try:
-        new_version = netstandard_inc_version(proj, 'PropertyGroup/Version')
+        if new_version is None:
+            new_version = netstandard_inc_version(proj, 'PropertyGroup/Version')
         if new_version:
             version = new_version
     except Exception as e:
         print(str(e))
 
     try:
-        new_version = netstandard_inc_version(proj, 'PropertyGroup/PackageVersion')
+        if new_version is None:
+            new_version = netstandard_inc_version(proj, 'PropertyGroup/PackageVersion')
         if new_version:
             version = new_version
     except Exception as e:
@@ -83,15 +87,15 @@ def netstandard_main(file_name):
     print(version, end='')
 
 
-def vbframework_main(file_name):
-    new_version = find_and_increase(file_name, r'^\<Assembly: AssemblyFileVersion\("(.*)"\)\>')
+def vbframework_main(file_name, new_version=None):
+    new_version = find_and_replace(file_name, r'^\<Assembly: AssemblyFileVersion\("(.*)"\)\>', new_version)
     if new_version is None:
         print("no changes")
         sys.exit(1)
     print(new_version, end='')
 
-def csframework_main(file_name):
-    new_version = find_and_increase(file_name, r'^\[assembly: AssemblyFileVersion\("(.*)"\)]$')
+def csframework_main(file_name, new_version=None):
+    new_version = find_and_replace(file_name, r'^\[assembly: AssemblyFileVersion\("(.*)"\)]$', new_version)
     if new_version is None:
         print("no changes")
         sys.exit(1)
@@ -102,11 +106,16 @@ if __name__ == '__main__':
     edit_type = sys.argv[1]
     file_name = sys.argv[2]
 
+    if len(sys.argv) == 4:
+        new_version = sys.argv[3]
+    else:
+        new_version = None
+
     if edit_type == 'netstandard':
-        netstandard_main(file_name)
+        netstandard_main(file_name, new_version)
     elif edit_type == 'vbframework':
-        vbframework_main(file_name)
+        vbframework_main(file_name, new_version)
     elif edit_type == 'csframework':
-        csframework_main(file_name)
+        csframework_main(file_name, new_version)
     else:
         sys.exit(255)

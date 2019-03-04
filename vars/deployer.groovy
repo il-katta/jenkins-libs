@@ -72,3 +72,5 @@ def upload(HashMap argsMap) {
         run(args)
     }
 }
+
+return this
