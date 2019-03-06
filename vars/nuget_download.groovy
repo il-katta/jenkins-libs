@@ -46,7 +46,7 @@ def call() {
 
 
 def call(String slnFile) {
-    if ((new File("nuget.exe")).exists()) {
+    if (!(new File("nuget.exe")).exists()) {
         print "starting download nuget.exe ..."
         if (isUnix()) {
             download_unix()

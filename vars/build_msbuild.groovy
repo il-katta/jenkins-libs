@@ -1,28 +1,30 @@
 #!/usr/bin/groovy
-def call(String projectFile, configuration = 'Release', platofrm = 'AnyCPU', args = '') {
+def call(String projectFile, configuration = 'Release', platofrm = 'AnyCPU', target='Rebuild', args = '') {
     if (isUnix()) {
-        sh "\"${tool name: 'xbuild', type: 'msbuild'}\" \"${projectFile}\" /p:Configuration=${configuration} /p:Platform=${platofrm} /t:Rebuild ${args}"
+        sh "\"${tool name: 'xbuild', type: 'msbuild'}\" \"${projectFile}\" /p:Configuration=${configuration} /p:Platform=${platofrm} /t:${target} ${args}"
     } else {
-        bat "\"${tool name: 'msbuild', type: 'msbuild'}\" \"${projectFile}\" /p:Configuration=${configuration} /p:Platform=${platofrm} /t:Rebuild ${args}"
+        bat "\"${tool name: 'msbuild', type: 'msbuild'}\" \"${projectFile}\" /p:Configuration=${configuration} /p:Platform=${platofrm} /t:${target} ${args}"
     }
 }
 
 /**
- * params: projectFile ( required ), configuration: 'Release', platform: 'AnyCPU', args: ''
+ * params: projectFile ( required ), configuration: 'Release', platform: 'AnyCPU', target: 'Rebuild', args: ''
  */
 def call(HashMap argsMap, String projectFile) {
     argsMap.configuration = argsMap.get("configuration", "Release")
     argsMap.platform = argsMap.get("platform", "AnyCPU")
     argsMap.args = argsMap.get("args", "")
-    call(projectFile, argsMap.configuration, argsMap.platform, argsMap.args)
+    argsMap.target = argsMap.get("target", "Rebuild")
+    call(projectFile, argsMap.configuration, argsMap.platform, argsMap.target, argsMap.args)
 }
 
 /**
- * params: projectFile ( required ), configuration: 'Release', platform: 'AnyCPU', args: ''
+ * params: projectFile ( required ), configuration: 'Release', platform: 'AnyCPU', target: 'Rebuild', args: ''
  */
 def call(HashMap argsMap) {
-    argsMap.configuration = argsMap.configuration ?: 'Release'
-    argsMap.platform = argsMap.platform ?: 'AnyCPU'
-    argsMap.args = argsMap.args ?: ''
-    call(argsMap.projectFile, argsMap.configuration, argsMap.platform, argsMap.args)
+    argsMap.configuration = argsMap.get("configuration", "Release")
+    argsMap.platform = argsMap.get("platform", "AnyCPU")
+    argsMap.args = argsMap.get("args", "")
+    argsMap.target = argsMap.get("target", "Rebuild")
+    call(argsMap.projectFile, argsMap.configuration, argsMap.platform, argsMap.target, argsMap.args)
 }
