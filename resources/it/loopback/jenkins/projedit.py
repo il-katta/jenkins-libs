@@ -35,12 +35,13 @@ def increase_version_str(current_version):
     return '.'.join(current_version.split('.')[:-1]) + '.' + str(int(build_n) + 1)
 
 
-def netstandard_inc_version(proj, path):
+def netstandard_set_version(proj, path, new_version=None):
     node = proj.find(path)
     if node is None:
         return
-    current_version = node.text
-    new_version = increase_version_str(current_version)
+    if new_version is None:
+        current_version = node.text
+        new_version = increase_version_str(current_version)
     xml_change_value_if_exists(proj, path, new_version)
     return new_version
 
@@ -64,16 +65,12 @@ def netstandard_main(file_name, new_version=None):
     proj = ElementTree.parse(file_name)
     version = None
     try:
-        if new_version is None:
-            new_version = netstandard_inc_version(proj, 'PropertyGroup/Version')
-        if new_version:
-            version = new_version
+        version = netstandard_set_version(proj, 'PropertyGroup/Version', new_version)
     except Exception as e:
         print(str(e))
 
     try:
-        if new_version is None:
-            new_version = netstandard_inc_version(proj, 'PropertyGroup/PackageVersion')
+        new_version = netstandard_set_version(proj, 'PropertyGroup/PackageVersion', new_version)
         if new_version:
             version = new_version
     except Exception as e:
