@@ -1,4 +1,8 @@
 #!/usr/bin/groovy
+import jenkins.*
+import jenkins.model.*
+import hudson.*
+import hudson.model.* 
 
 def download_unix() {
     def ret = sh(
@@ -7,10 +11,8 @@ def download_unix() {
             curl -o nuget.exe "https://dist.nuget.org/win-x86-commandline/latest/nuget.exe"
         '''
     )
-    if (ret == 0) {
-        print "nuget_download returns code ${ret}"
-    } else {
-        error "nuget_download returns error code ${ret}"
+    if (ret != 0) {
+        error "nuget.download returns error code ${ret}"
         throw new Exception("nuget_download returns error code ${ret}")
     }
 }
@@ -27,9 +29,7 @@ def download_windows() {
             exit 0
         '''
     )
-    if (ret == 0) {
-        print "nuget.download returns code ${ret}"
-    } else {
+    if (ret != 0) {
         error "nuget.download returns error code ${ret}"
         throw new Exception("nuget_download returns error code ${ret}")
     }
@@ -43,6 +43,10 @@ def download() {
             download_unix()
         } else {
             download_windows()
+        }
+    } else {
+        if (!isUnix()) {
+            powershell 'Set-Alias nuget nuget.exe -Scope Global -Verbose'
         }
     }
 }
