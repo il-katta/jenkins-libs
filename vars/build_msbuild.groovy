@@ -1,9 +1,9 @@
 #!/usr/bin/groovy
 def call(String projectFile, configuration = 'Release', platofrm = 'AnyCPU', target='Rebuild', args = '') {
     if (isUnix()) {
-        sh "\"${tool name: 'xbuild', type: 'msbuild'}\" \"${projectFile}\" /p:Configuration=${configuration} /p:Platform=${platofrm} /t:${target} ${args}"
+        sh "\"${tool name: 'xbuild', type: 'msbuild'}\" \"${projectFile}\" /p:Configuration=\"${configuration}\" /p:Platform=\"${platofrm}\" /t:\"${target}\" ${args}"
     } else {
-        bat "\"${tool name: 'msbuild', type: 'msbuild'}\" \"${projectFile}\" /p:Configuration=${configuration} /p:Platform=${platofrm} /t:${target} ${args}"
+        bat "\"${tool name: 'msbuild', type: 'msbuild'}\" \"${projectFile}\" /p:Configuration=\"${configuration}\" /p:Platform=\"${platofrm}\" /t:\"${target}\" ${args}"
     }
 }
 
