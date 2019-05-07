@@ -48,7 +48,6 @@ def netstandard_set_version(proj, path, new_version=None):
 
 def find_and_replace(file_name, regexp, new_version=None):
     re_assembly_file = re.compile(regexp)
-    new_version = None
     with fileinput.FileInput(file_name, inplace=True, backup='.bak') as file:
         for line in file:
             if re_assembly_file.match(line):

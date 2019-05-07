@@ -28,7 +28,7 @@ class Projedit implements Serializable {
 
     void execute(String cmd) {
         if (this.script.isUnix()) {
-            return script.sh (
+            return this.script.sh (
                 script: cmd,
                 returnStdout: true
             ).trim()
